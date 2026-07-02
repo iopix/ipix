@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ipix.fun everyday is fun</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { height: 100dvh; margin: 0; background-color: #0f172a; overflow: hidden; touch-action: none; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0 auto; width: 100%; max-width: 800px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); position: relative; border-left: 1px solid #334155; border-right: 1px solid #334155; }
+
+        .pill, .ipix-capsule { will-change: transform; }
+
+        .header-group { position: fixed; top: 12px; width: 100%; max-width: 800px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1005; }
+        .header-capsule { padding: 9px 18px; background: transparent; backdrop-filter: blur(15px); border-radius: 45px; color: #39ff14; text-decoration: none; font-size: 0.81rem; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; height: 36px; position: relative; overflow: hidden; z-index: 0; animation: pulse-soft 2s infinite ease-in-out; }
+        .header-capsule::before { content: ''; position: absolute; top: 50%; left: 50%; width: 150%; height: 300%; background: conic-gradient(from 0deg, transparent 70%, #39ff14 100%); transform: translate(-50%, -50%); animation: rotate-border 2s linear infinite; z-index: -2; }
+        .header-capsule::after { content: ''; position: absolute; inset: 1.5px; background: #151e2f; border-radius: 45px; z-index: -1; }
+        @keyframes rotate-border { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes pulse-soft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+        .header-capsule:active { box-shadow: 0 0 20px rgba(57, 255, 20, 0.8); transform: scale(0.95); }
+
+        .music-player { padding: 9px 13px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 45px; color: white; display: flex; align-items: center; gap: 9px; font-size: 0.81rem; box-shadow: 0 5px 15px rgba(0,0,0,0.3); height: 36px; }
+        .music-player button { background: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 4px 9px; border-radius: 13px; cursor: pointer; font-weight: bold; }
+
+        .ipix-capsule { position: fixed; bottom: 25px; left: 0; padding: 13px 27px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 45px; color: white; font-weight: 800; text-decoration: none; font-size: 1rem; z-index: 999; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.2); white-space: nowrap; visibility: hidden; }
+
+        #control-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; z-index: 998; }
+        #reload-btn, #info-trigger { padding: 9px 18px; border-radius: 18px; cursor: pointer; font-weight: bold; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); font-size: 0.81rem; user-select: none; color: white; background: rgba(255, 255, 255, 0.1); }
+        #reload-btn { background: rgba(255, 87, 34, 0.4); }
+
+        .pill { position: absolute; border-radius: 45px; background: linear-gradient(45deg, var(--c1), var(--c2)); background-size: 200% 200%; animation: gradientMove 4s ease infinite; border: 2px solid rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: flex-start; padding-left: 40px; font-size: 0.81rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: grab; user-select: none; z-index: 1; touch-action: none; }
+        .pill-icon { position: absolute; left: 10px; width: 20px; height: 20px; animation: wiggle 1s ease-in-out infinite alternate; }
+        
+        @keyframes wiggle { 0% { transform: translateY(-2px) rotate(-15deg); } 100% { transform: translateY(2px) rotate(15deg); } }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        #target-pill { width: 146px; height: 46px; border-radius: 45px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 2px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.75rem; pointer-events: none; }
+        .target-glow { background: rgba(255, 255, 255, 0.25) !important; box-shadow: 0 0 30px rgba(255, 255, 255, 0.5); transform: scale(1.1) !important; border-color: rgba(255, 255, 255, 0.8) !important; }
+
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); z-index: 2000; align-items: center; justify-content: center; }
+        #modal-card { width: 85%; max-width: 350px; padding: 27px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); border-radius: 27px; color: white; text-align: left; }
+        #close-btn { width: 45px; height: 45px; background: #ff416c; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 18px auto 0; }
+        ul { padding-left: 20px; margin: 10px 0; }
+        li { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="header-group">
+        <a href="https://ipix.my.id" class="header-capsule" target="_blank">www.ipix.my.id</a>
+        <div class="music-player">
+            <span id="track-name">Paused</span>
+            <button id="btn-play-pause" onclick="toggleAudio()">Play</button>
+            <button onclick="nextTrack()">Next</button>
+        </div>
+    </div>
+
+    <a href="https://ipix.fun" class="ipix-capsule">ipix.fun makes everything is fun</a>
+
+    <div id="control-panel">
+        <div id="info-trigger" onclick="toggleModal(true)">Info</div>
+        <div id="target-pill">Menuju Link</div>
+        <div id="reload-btn" onclick="resetPositions()">Reload</div>
+    </div>
+
+    <div id="modal">
+        <div id="modal-card">
+            <p><b>Info Cara:</b></p>
+            <ul>
+                <li><b>Tap layar 1x</b>: Melakukan <b>Pause</b> dan <b>Merapihkan posisi Capsule</b>.</li>
+                <li><b>Tap Lagi</b>: <b>Ganti Warna</b> random.</li>
+                <li><b>Klik Reload</b>: Untuk <b>Melanjutkan</b> kembali pergerakan.</li>
+                <li><b>Geser Capsule</b> lalu arahkan Capsule ke :
+<div id="target-pill"><b>Menuju Link</b></div>
+                ketika menyala lepas dan akan di arahkan ke situs link sesuai <b>Capsule link</b> yang dipilih.</li>
+                <li><b>Have Fun gays!</b></li>
+                
+                 <a href="https://ipix.fun" class="header-capsule" target="_blank">www.ipix.fun</a>
+                 <li>Best regards.</li>
+                 <a href="https://ipix.my.id" class="header-capsule" target="_blank">www.ipix.my.id</a>
+                 
+            </ul>
+            <div id="close-btn" onclick="toggleModal(false)">x</div>
+        </div>
+    </div>
+
+<script>
+    const playlist = [
+        { name: "Lagu 1", url: "https://raw.githubusercontent.com/iopix/ipix/main/lagu1.mp3" },
+        { name: "Lagu 2", url: "https://raw.githubusercontent.com/iopix/ipix/main/lagu2.mp3" }
+    ];
+    let audio = new Audio();
+    let currentTrackIndex = 0;
+    let hasStarted = false;
+    let appState = 'moving'; 
+
+    let musicBounds, capBounds, tRect, containerWidth;
+    function updateLayoutBounds() {
+        musicBounds = document.querySelector('.music-player').getBoundingClientRect();
+        capBounds = document.querySelector('.ipix-capsule').getBoundingClientRect();
+        tRect = document.getElementById('target-pill').getBoundingClientRect();
+        containerWidth = document.body.clientWidth;
+    }
+    window.addEventListener('resize', updateLayoutBounds);
+    updateLayoutBounds();
+
+    function toggleAudio() {
+        if (!hasStarted) { audio.src = playlist[currentTrackIndex].url; hasStarted = true; }
+        if (audio.paused) { audio.play(); document.getElementById('btn-play-pause').innerText = "Pause"; document.getElementById('track-name').innerText = playlist[currentTrackIndex].name; }
+        else { audio.pause(); document.getElementById('btn-play-pause').innerText = "Play"; document.getElementById('track-name').innerText = "Paused"; }
+    }
+
+    function nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+        audio.src = playlist[currentTrackIndex].url; audio.play();
+        document.getElementById('track-name').innerText = playlist[currentTrackIndex].name;
+        document.getElementById('btn-play-pause').innerText = "Pause";
+    }
+
+    const links = [
+        { label: "X@sixripix", url: "https://www.x.com/sixripix", icon: "https://cdn.simpleicons.org/x/white" },
+        { label: "Walla@pix", url: "https://international.walla-app.com/user?id=V2O6MN&app=2", icon: "https://cdn.simpleicons.org/chatwoot/white" },
+        { label: "TikTok@ipixaja", url: "https://www.tiktok.com/@ipixaja", icon: "https://cdn.simpleicons.org/tiktok/white" },
+        { label: "ipix.my.id", url: "https://ipix.my.id", icon: "https://cdn.simpleicons.org/telegram/white" },
+        { label: "Growlr@pix", url: "https://growlrapp.com", icon: "https://cdn.simpleicons.org/bun/white" },
+        { label: "iPix.Fun", url: "https://ipix.fun", icon: "https://cdn.simpleicons.org/facebook/white" }
+    ];
+
+    const targetEl = document.getElementById('target-pill');
+    let ipixX = 0;
+    let ipixVX = 3;
+    const w = 139; const h = 46; 
+    const pills = [];
+    let isPaused = false;
+    let activePill = null;
+    let offsetX, offsetY;
+
+    function setRandomColors(el) {
+        const hueStart = Math.random() * 360;
+        const hueEnd = (hueStart + 60) % 360;
+        el.style.setProperty('--c1', `hsl(${hueStart}, 70%, 50%)`);
+        el.style.setProperty('--c2', `hsl(${hueEnd}, 70%, 50%)`);
+    }
+
+    function randomizeAllColors() {
+        pills.forEach(p => setRandomColors(p.el));
+    }
+
+    function alignPills() {
+        updateLayoutBounds();
+        const centerX = (containerWidth - w) / 2;
+        
+        const topSpace = tRect.top - musicBounds.bottom;
+        const topStep = topSpace / 4; 
+        for (let i = 0; i < 3; i++) {
+            pills[i].x = centerX;
+            pills[i].y = musicBounds.bottom + (topStep * (i + 1)) - (h / 2);
+            pills[i].el.style.transform = `translate3d(${pills[i].x}px, ${pills[i].y}px, 0)`;
+        }
+
+        const bottomSpace = capBounds.top - tRect.bottom;
+        const bottomStep = bottomSpace / 4;
+        for (let i = 3; i < 6; i++) {
+            pills[i].x = centerX;
+            pills[i].y = tRect.bottom + (bottomStep * (i - 2)) - (h / 2);
+            pills[i].el.style.transform = `translate3d(${pills[i].x}px, ${pills[i].y}px, 0)`;
+        }
+    }
+
+    links.forEach(link => {
+        const div = document.createElement('div');
+        div.className = 'pill'; div.innerText = link.label;
+        div.style.width = w + 'px'; div.style.height = h + 'px';
+        const img = document.createElement('img'); img.src = link.icon; img.className = 'pill-icon';
+        div.appendChild(img);
+        document.body.appendChild(div);
+        
+        const pillObj = { el: div, x: 0, y: 0, vx: (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3, url: link.url, label: link.label };
+        pills.push(pillObj);
+        setRandomColors(div);
+        
+        div.addEventListener('mousedown', (e) => startDrag(e, pillObj));
+        div.addEventListener('touchstart', (e) => startDrag(e, pillObj), {passive:false});
+    });
+
+    function resetPositions() {
+        appState = 'moving';
+        isPaused = false;
+        updateLayoutBounds();
+        const centerX = (containerWidth / 2) - (w / 2);
+
+        pills.forEach((p, i) => {
+            p.x = centerX + (Math.random() - 0.5) * 50;
+            // Area 0-2 (Top)
+            if (i < 3) {
+                p.y = musicBounds.bottom + 10 + Math.random() * (tRect.top - musicBounds.bottom - h - 20);
+            } 
+            // Area 3-5 (Bottom)
+            else {
+                p.y = tRect.bottom + 10 + Math.random() * (capBounds.top - tRect.bottom - h - 20);
+            }
+            setRandomColors(p.el);
+            p.vx = (Math.random() - 0.5) * 3;
+            p.vy = (Math.random() - 0.5) * 3;
+            p.el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
+        });
+        document.querySelector('.ipix-capsule').style.visibility = 'visible';
+    }
+
+    resetPositions();
+
+    function startDrag(e, obj) {
+        activePill = obj;
+        targetEl.innerText = "Menuju " + obj.label;
+        const styles = getComputedStyle(obj.el);
+        const c1 = styles.getPropertyValue('--c1');
+        const c2 = styles.getPropertyValue('--c2');
+        targetEl.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - obj.x; offsetY = clientY - obj.y;
+    }
+
+    function endDrag() {
+        if (!activePill) return;
+        targetEl.innerText = "Menuju Link";
+        targetEl.style.background = "rgba(255, 255, 255, 0.05)";
+        targetEl.classList.remove('target-glow');
+        if (activePill.x + w/2 > tRect.left && activePill.x + w/2 < tRect.right && 
+            activePill.y + h/2 > tRect.top && activePill.y + h/2 < tRect.bottom) {
+            window.open(activePill.url, '_blank');
+        }
+        activePill = null;
+    }
+
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+    window.addEventListener('mousemove', (e) => { if(activePill) movePill(e); });
+    window.addEventListener('touchmove', (e) => { if(activePill) movePill(e); }, {passive:false});
+
+    function movePill(e) {
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        
+        let newX = clientX - offsetX;
+        let newY = clientY - offsetY;
+        
+        activePill.x = Math.max(0, Math.min(newX, containerWidth - w));
+        activePill.y = Math.max(0, Math.min(newY, window.innerHeight - h));
+        
+        activePill.el.style.transform = `translate3d(${activePill.x}px, ${activePill.y}px, 0)`;
+        
+        if (activePill.x + w/2 > tRect.left && activePill.x + w/2 < tRect.right && 
+            activePill.y + h/2 > tRect.top && activePill.y + h/2 < tRect.bottom) {
+            targetEl.classList.add('target-glow');
+        } else {
+            targetEl.classList.remove('target-glow');
+        }
+    }
+
+    function update() {
+        const cap = document.querySelector('.ipix-capsule');
+        const capWidth = cap.offsetWidth;
+        const viewWidth = window.innerWidth; 
+
+        ipixX += ipixVX;
+
+        if (ipixX + capWidth >= viewWidth || ipixX <= 0) {
+            ipixVX *= -1;
+            ipixX = Math.max(0, Math.min(ipixX, viewWidth - capWidth));
+        }
+        cap.style.transform = `translateX(${ipixX}px)`;
+
+        if (!isPaused) {
+            pills.forEach((p, i) => {
+                if (p === activePill) return;
+                p.x += p.vx; p.y += p.vy;
+                
+                // Horizontal Bounce
+                if (p.x + w >= containerWidth || p.x <= 0) p.vx *= -1;
+                
+                // Vertical Bounce (Zone-based)
+                if (i < 3) {
+                    // Top Zone
+                    if (p.y <= musicBounds.bottom) { p.y = musicBounds.bottom; p.vy *= -1; }
+                    if (p.y + h >= tRect.top) { p.y = tRect.top - h; p.vy *= -1; }
+                } else {
+                    // Bottom Zone
+                    if (p.y <= tRect.bottom) { p.y = tRect.bottom; p.vy *= -1; }
+                    if (p.y + h >= capBounds.top) { p.y = capBounds.top - h; p.vy *= -1; }
+                }
+                
+                p.el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
+            });
+        }
+        requestAnimationFrame(update);
+    }
+    update();
+
+    function toggleModal(show) { document.getElementById('modal').style.display = show ? 'flex' : 'none'; }
+    
+    window.addEventListener('mousedown', (e) => {
+        if(!hasStarted) toggleAudio();
+        if(e.target.id === 'reload-btn') return;
+
+        if (appState === 'moving') {
+            isPaused = true;
+            alignPills();
+            appState = 'aligned';
+        } else {
+            randomizeAllColors();
+        }
+    });
+</script>
+</body>
+</html>
